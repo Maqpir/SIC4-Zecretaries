@@ -4,11 +4,28 @@ import time
 import os
 import pyrebase
 import subprocess
+import requests
 
+#tele
+TOKEN = '6112676569:AAFb7cGIHMoBOrcONRBCUuSHsjOGKlTUrXk'
+chat_id = 801404111   #chat id pengguna
+image_name = os.getcwd() + "/" + "img.jpg"
+list_chat_id = ["801404111"]
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup (23, GPIO.IN) #set pin sensor sentuh
 
+def kirim_foto(nama_file):
+    for chat_id in list_chat_id:
+        image = open(nama_file,'rb')
+        #print(chat_id)
+        url = f'https://api.telegram.org/bot{TOKEN}/sendPhoto?chat_id={chat_id}'   #query  
+        resp = requests.post(url, files={'photo':image})
+
+        #res = requests.post(url , json=payload)
+        print(resp.status_code)
+        if int(resp.status_code) == 200:
+            print("succes send image")
 
 #set firebase
 firebaseConfig = {
@@ -46,17 +63,19 @@ def suara(inputcommand):
 
 def AmbilGambar () :
     print("Ambil Gambar!")
+    nama_file = "img.jpg"
+    #os.remove(nama_file)
+    #print("File Removed")
     camera = PiCamera()
     time.sleep(2)
     camera.resolution = (1600,1600)
     camera.vflip = True
     camera.contrast = 10
-    nama_file = "img.jpg"
     camera.capture(nama_file)
     storage.child(nama_file).put(nama_file)
+    kirim_foto(nama_file)
+    print(nama_file)
     print("Image sent")
-    os.remove(nama_file)
-    print("File Removed")
     camera.close()
 
 while True :
@@ -66,6 +85,3 @@ while True :
     
     time.sleep(1)
     
-
-
-
